@@ -3,6 +3,14 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# directorios de logs y 
+CameraModule_Log/
+
+# Formato de imagenes para no guardar
+*.jpg
+*.jpeg
+*.png
+
 # C extensions
 *.so
 
