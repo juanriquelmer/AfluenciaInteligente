@@ -154,12 +154,15 @@ class CameraModule:
 
         ssim_values = []
         for photo_number in range(self.max_photos):
+            if photo_number == self.photo_count:
+                continue
+
             photo_path = self._get_photo_path(photo_number)
             image = cv2.imread(photo_path, cv2.IMREAD_GRAYSCALE)
 
             if image is not None:
                 ssim_value = self._calculate_ssim(actual_image, image)
-                ssim_values.append(ssim_value)
+            ssim_values.append(ssim_value)
 
         average_ssim = np.mean(ssim_values)
         print(f"SSIM medio de la imagen actual con respecto a las anteriores: {average_ssim}")
