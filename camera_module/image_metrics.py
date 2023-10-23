@@ -31,49 +31,45 @@ class ImageMetrics:
         return noise_level
 
     @staticmethod
-    def calculate_images_mean(image_paths):
-        """Calcula el promedio de los valores de los pixeles de todas las imagenes en image_paths"""
+    def calculate_images_mean(inputs, from_path=True):
+        """Calcula el promedio de los valores de los pixeles de todas las imagenes."""
         image_means = []
-        for photo_path in image_paths:
-            image = cv2.imread(photo_path, cv2.IMREAD_GRAYSCALE)
+        for input_data in inputs:
+            image = cv2.imread(input_data, cv2.IMREAD_GRAYSCALE) if from_path else input_data
             if image is not None:
                 image_means.append(np.mean(image))
         overall_mean = np.mean(image_means) if len(image_means) > 0 else None
         return overall_mean
     
     @staticmethod
-    def calculate_images_variance(image_paths):
-        """Calcula la varianza de los valores de los pixeles de todas las imagenes en image_paths"""
+    def calculate_images_variance(inputs, from_path=True):
+        """Calcula la varianza de los valores de los pixeles de todas las imagenes."""
         image_variances = []
-        for photo_path in image_paths:
-            image = cv2.imread(photo_path, cv2.IMREAD_GRAYSCALE)
+        for input_data in inputs:
+            image = cv2.imread(input_data, cv2.IMREAD_GRAYSCALE) if from_path else input_data
             if image is not None:
                 image_variances.append(np.var(image))
         overall_variance = np.mean(image_variances) if len(image_variances) > 0 else None
         return overall_variance
-    
+
     @staticmethod
-    def calculate_average_ssim(image, image_paths):
+    def calculate_average_ssim(image, inputs, from_path=True):
         """Calcula el SSIM promedio entre las imágenes."""
         ssim_values = []
-
-        for photo_path in image_paths:
-            image = cv2.imread(photo_path, cv2.IMREAD_GRAYSCALE)
-
-            if image is not None and image is not None:
-                ssim_value = ImageMetrics._calculate_ssim(image, image)
+        for input_data in inputs:
+            compare_image = cv2.imread(input_data, cv2.IMREAD_GRAYSCALE) if from_path else input_data
+            if compare_image is not None:
+                ssim_value = ImageMetrics._calculate_ssim(image, compare_image)  # Make sure this method exists!
                 ssim_values.append(ssim_value)
-
         average_ssim = np.mean(ssim_values) if ssim_values else None
         return average_ssim
-    
-    @staticmethod
-    def check_sigma_criterion(last_image, image_paths, multiplier=3):
-        """Evalúa el criterio de las tres desviaciones estándar."""
-        overall_mean = ImageMetrics.calculate_images_mean(image_paths)
-        overall_variance = ImageMetrics.calculate_images_variance(image_paths)
 
-        # Si no se tienen datos suficientes, no evaluar el criterio
+    @staticmethod
+    def check_sigma_criterion(last_image, inputs, from_path=True, multiplier=3):
+        """Evalúa el criterio de las tres desviaciones estándar."""
+        overall_mean = ImageMetrics.calculate_images_mean(inputs, from_path=from_path)
+        overall_variance = ImageMetrics.calculate_images_variance(inputs, from_path=from_path)
+
         if overall_mean is None or overall_variance is None:
             return
 
@@ -81,12 +77,8 @@ class ImageMetrics:
         lower_bound = overall_mean - multiplier * std_dev
         upper_bound = overall_mean + multiplier * std_dev
 
-        # Calcula la media de la última imagen
         if last_image is not None:
             last_image_mean = np.mean(last_image)
-
-            # Evaluar el criterio de las desviaciones estándar
             if last_image_mean < lower_bound or last_image_mean > upper_bound:
                 return False  # Indicando que la imagen es una anomalía
-
         return True  # Indicando que la imagen está dentro del rango normal
