@@ -40,7 +40,7 @@ class ImageMetrics:
                 image_means.append(np.mean(image))
         overall_mean = np.mean(image_means) if len(image_means) > 0 else None
         return overall_mean
-    
+
     @staticmethod
     def calculate_images_variance(inputs, from_path=True):
         """Calcula la varianza de los valores de los pixeles de todas las imagenes."""

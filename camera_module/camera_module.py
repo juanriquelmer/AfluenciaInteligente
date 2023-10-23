@@ -1,8 +1,9 @@
 import os
 import time
-import cv2
 
+import cv2
 from image_metrics import ImageMetrics
+
 
 class CameraModule:
     """Clase para gestionar la cámara y procesar las imágenes capturadas."""
@@ -84,12 +85,12 @@ class CameraModule:
         print(f"  Entropía: {entropy}")
         print(f"  SSIM medio: {average_ssim}")
         print(f"  Nivel de ruido: {noise_level}")
-        
+
         if variance < 1000:
             print(f"Advertencia: La imagen {self.photo_count} podría estar oscurecida/obstruida.")
         if not is_normal:
             print(f"Advertencia: La imagen {self.photo_count} podría estar desviada de la normalidad.")
-        
+
     def _handle_error(self):
         """Maneja los errores que pueden surgir durante la captura o gestión de fotos."""
         pass

@@ -1,4 +1,4 @@
-from camera_module.CameraModule import CameraModule
+from camera_module.camera_module import CameraModule
 
 
 def main():
