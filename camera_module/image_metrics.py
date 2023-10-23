@@ -66,7 +66,7 @@ class ImageMetrics:
 
     @staticmethod
     def check_sigma_criterion(last_image, inputs, from_path=True, multiplier=3):
-        """Evalúa el criterio de las tres desviaciones estándar."""
+        """Evalúa el criterio de las desviaciones estándar."""
         overall_mean = ImageMetrics.calculate_images_mean(inputs, from_path=from_path)
         overall_variance = ImageMetrics.calculate_images_variance(inputs, from_path=from_path)
 
