@@ -40,7 +40,7 @@ class ImageMetrics:
                 image_means.append(np.mean(image))
         overall_mean = np.mean(image_means) if len(image_means) > 0 else None
         return overall_mean
-    
+
     @staticmethod
     def calculate_images_variance(image_paths):
         """Calcula la varianza de los valores de los pixeles de todas las imagenes en image_paths"""
@@ -51,7 +51,7 @@ class ImageMetrics:
                 image_variances.append(np.var(image))
         overall_variance = np.mean(image_variances) if len(image_variances) > 0 else None
         return overall_variance
-    
+
     @staticmethod
     def calculate_average_ssim(image, image_paths):
         """Calcula el SSIM promedio entre las imágenes."""
@@ -66,7 +66,7 @@ class ImageMetrics:
 
         average_ssim = np.mean(ssim_values) if ssim_values else None
         return average_ssim
-    
+
     @staticmethod
     def check_sigma_criterion(last_image, image_paths, multiplier=3):
         """Evalúa el criterio de las tres desviaciones estándar."""
