@@ -1,84 +1,93 @@
 import cv2
 import numpy as np
 from scipy import stats
-from skimage.metrics import structural_similarity as ssim
-
 
 class ImageMetrics:
-    def __init__(self):
-        pass
 
     @staticmethod
-    def calculate_variance(image):
-        return np.var(image)
+    def load_image(input_data, file_path=True):
+        """Carga una imagen dada una ruta o directamente."""
+        if file_path:
+            return cv2.imread(input_data)
+        return input_data
+    
+    def load_images(input_data, file_path=True):
+        """Carga una lista de imágenes dada una ruta o directamente."""
+        if file_path:
+            return [cv2.imread(image) for image in input_data]
+        return input_data
 
     @staticmethod
-    def calculate_entropy(image):
-        hist = cv2.calcHist([image], [0], None, [256], [0, 256])
-        hist = hist.ravel() / hist.sum()
-        return stats.entropy(hist)
+    def brightness_metric(input_data, file_path=True):
+        """Devuelve el brillo promedio de la imagen."""
+        image = ImageMetrics.load_image(input_data, file_path)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        return np.mean(gray)
 
     @staticmethod
-    def calculate_ssim(image_a, image_b):
-        return ssim(image_a, image_b)
+    def variance_of_laplacian(input_data, file_path=True):
+        """Devuelve la varianza del Laplaciano (medida de enfoque)."""
+        image = ImageMetrics.load_image(input_data, file_path)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        return cv2.Laplacian(gray, cv2.CV_64F).var()
+    
+    @staticmethod
+    def histogram_entropy(input_data, file_path=True):
+        """Devuelve la entropía del histograma de la imagen."""
+        image = ImageMetrics.load_image(input_data, file_path)
+        hist = cv2.calcHist([image], [0], None, [256], [0,256])
+        hist /= hist.sum()
+        entropy = -np.sum(hist*np.log2(hist + np.finfo(float).eps))
+        return entropy
 
     @staticmethod
-    def calculate_noise_level(image):
-        f = np.fft.fft2(image)
-        fshift = np.fft.fftshift(f)
-        magnitude_spectrum = np.log(np.abs(fshift))
-        noise_level = np.max(magnitude_spectrum) - np.mean(magnitude_spectrum)
-        return noise_level
+    def image_contrast(input_data, file_path=True):
+        """Devuelve el contraste de la imagen."""
+        image = ImageMetrics.load_image(input_data, file_path)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        return np.std(gray)  
 
     @staticmethod
-    def calculate_images_mean(inputs, from_path=True):
-        """Calcula el promedio de los valores de los pixeles de todas las imagenes."""
-        image_means = []
-        for input_data in inputs:
-            image = cv2.imread(input_data, cv2.IMREAD_GRAYSCALE) if from_path else input_data
-            if image is not None:
-                image_means.append(np.mean(image))
-        overall_mean = np.mean(image_means) if len(image_means) > 0 else None
-        return overall_mean
-
+    def get_metrics(input_data, file_path=True):
+        """Devuelve las métricas de una imagen."""
+        image = ImageMetrics.load_image(input_data, file_path)
+        metrics = {
+            'brightness': ImageMetrics.brightness_metric(input_data, file_path),
+            'variance_of_laplacian': ImageMetrics.variance_of_laplacian(input_data, file_path),
+            'histogram_entropy': ImageMetrics.histogram_entropy(input_data, file_path),
+            'image_contrast': ImageMetrics.image_contrast(input_data, file_path)
+        }
+        return metrics
+    
     @staticmethod
-    def calculate_images_variance(inputs, from_path=True):
-        """Calcula la varianza de los valores de los pixeles de todas las imagenes."""
-        image_variances = []
-        for input_data in inputs:
-            image = cv2.imread(input_data, cv2.IMREAD_GRAYSCALE) if from_path else input_data
-            if image is not None:
-                image_variances.append(np.var(image))
-        overall_variance = np.mean(image_variances) if len(image_variances) > 0 else None
-        return overall_variance
+    def analyze_image_set(images, file_path=True, metric_func=None):
+        """Analiza un conjunto de imágenes y decide si es necesario tomar otra foto o emitir una alerta."""
+        if not metric_func:
+            raise ValueError("Por favor proporciona una función de métrica.")
 
-    @staticmethod
-    def calculate_average_ssim(image, inputs, from_path=True):
-        """Calcula el SSIM promedio entre las imágenes."""
-        ssim_values = []
-        for input_data in inputs:
-            compare_image = cv2.imread(input_data, cv2.IMREAD_GRAYSCALE) if from_path else input_data
-            if compare_image is not None:
-                ssim_value = ImageMetrics._calculate_ssim(image, compare_image)  # Make sure this method exists!
-                ssim_values.append(ssim_value)
-        average_ssim = np.mean(ssim_values) if ssim_values else None
-        return average_ssim
+        metric_values = [metric_func(img, file_path) for img in images]
 
-    @staticmethod
-    def check_sigma_criterion(last_image, inputs, from_path=True, multiplier=3):
-        """Evalúa el criterio de las desviaciones estándar."""
-        overall_mean = ImageMetrics.calculate_images_mean(inputs, from_path=from_path)
-        overall_variance = ImageMetrics.calculate_images_variance(inputs, from_path=from_path)
+        mean_value = np.mean(metric_values)
+        median_value = np.median(metric_values)
+        std_value = np.std(metric_values)
+        
+        percentile10 = np.percentile(metric_values, 10)
+        percentile25 = np.percentile(metric_values, 25)
+        percentile75 = np.percentile(metric_values, 75)
+        percentile90 = np.percentile(metric_values, 90)
 
-        if overall_mean is None or overall_variance is None:
-            return
+        mean_minus_3std = mean_value - 3 * std_value
+        mean_plus_3std = mean_value + 3 * std_value
 
-        std_dev = np.sqrt(overall_variance)
-        lower_bound = overall_mean - multiplier * std_dev
-        upper_bound = overall_mean + multiplier * std_dev
-
-        if last_image is not None:
-            last_image_mean = np.mean(last_image)
-            if last_image_mean < lower_bound or last_image_mean > upper_bound:
-                return False  # Indicando que la imagen es una anomalía
-        return True  # Indicando que la imagen está dentro del rango normal
+        return {
+            "mean": mean_value,
+            "median": median_value,
+            "std": std_value,
+            "percentile10": percentile10,
+            "percentile25": percentile25,
+            "percentile75": percentile75,
+            "percentile90": percentile90,
+            "mean_minus_3std": mean_minus_3std,
+            "mean_plus_3std": mean_plus_3std,
+            "all_values": metric_values
+        }
