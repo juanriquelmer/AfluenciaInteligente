@@ -36,6 +36,7 @@ def image_reader(dir: str, modo: str = "normal"):
     Returns:
         np.array: Array de numpy con la imagen
     """
+    print(f"Image: {dir}", end = "")
     if isfile(dir):
         print(f"Image: {dir}", end = "")
         if modo == "ROI":

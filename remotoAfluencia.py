@@ -12,7 +12,7 @@ from Counter import Runner  # Importa la función desde Proyecto.py
 model = 'yolov8x.pt'
 modo = 'ROI'
 confidence = 0.2
-jpg_path = r"C:\Users\Israel\Desktop\ELO328\Proyecto\Test_imgs\test_image.jpg"
+jpg_path = r"/home/jose/Git/AfluenciaInteligente/detector_module/Tarea_imgs/IMG_1314.JPG"
 
 ###############################################################################
 # Web
