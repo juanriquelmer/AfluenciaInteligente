@@ -17,6 +17,14 @@ model = 'yolov8x.pt'
 modo = 'normal'
 confidence = 0.2
 
+# Definicón de la URL de la API
+api_url = "https://dqrqv2q9jg.execute-api.sa-east-1.amazonaws.com/deploy" 
+
+# Obtenemos la zona horaria de Santiago de Chile
+santiago_timezone = timezone('Chile/Continental')
+
+zona = 1 
+
 def run_cam_module(module):
     module.capturing = True
     try:
@@ -39,7 +47,26 @@ def main():
         jpg_path = cam_module._get_last_photo_path()
         #jpg_path = cam_module.get_last_photo_path(detector_photo_count)
 
-        count = Runner(jpg_path, modo, confidence, model)
+        cantidad = Runner(jpg_path, modo, confidence, model)
+        
+        # Obtén la hora actual en Santiago de Chile automáticamente
+        now = datetime.now(santiago_timezone).strftime("%Y-%m-%d %H:%M:%S")
+        dia = datetime.now(santiago_timezone).strftime("%A")
+        
+        # Datos a enviar en la solicitud POST
+        data = {
+            "zona": str(zona),
+            "cantidad": cantidad,
+            "tiempo": now,
+            "dia": dia
+        }
+
+        # Convierte los datos a JSON
+        data_json = json.dumps(data)
+
+        # Realiza la solicitud POST
+        response = requests.post(api_url, data=data_json, headers={"Content-Type": "application/json"})
+        
         """
         if cam_module.get_actual_count() > detector_photo_count
             count = Runner(jpg_path, modo, confidence, model)
@@ -48,7 +75,6 @@ def main():
             pass
         """
         
-
     #runner(path)
 
 

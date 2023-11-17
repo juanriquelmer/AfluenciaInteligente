@@ -44,9 +44,9 @@ class CameraModule:
         photo_path = self._get_photo_path(photo_number)
         ret, frame = self.cap.read()
         if ret:
+            #self._evaluate_last_image_metrics()
             cv2.imwrite(photo_path, frame)
             print(f"Foto {photo_path} guardada.")
-            self._evaluate_last_image_metrics()
         else:
             print("Error capturando la foto.")
             self._handle_error()
