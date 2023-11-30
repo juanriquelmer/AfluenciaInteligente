@@ -2,7 +2,7 @@ import json
 import requests
 from pytz import timezone
 from datetime import datetime
-from Counter import Runner  # Importa la función desde Proyecto.py
+from Counter import Runner  # Importa la función desde Counter.py
 
 # link pagina web:
 # https://main.d7a6ikqkx1vx5.amplifyapp.com/
